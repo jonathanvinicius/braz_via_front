@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="1800" height="1120" viewBox="0 0 1800 1120" role="img"
+     aria-labelledby="title desc">
+  <title id="title">BRAZVIA Backend — arquitetura AWS (produção)</title>
+  <desc id="desc">Diagrama AWS com Cloud, VPC, subnet pública e privada, Lambda, RDS PostgreSQL, Cognito, API Gateway, S3 e CloudFront.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#545B64"/>
+    </marker>
+    <marker id="arrow-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#C45500"/>
+    </marker>
+    <filter id="none"/>
+  </defs>
+
+  <style>
+    .page { font-family: "Amazon Ember", "Helvetica Neue", Arial, sans-serif; }
+    .h1 { font-size: 22px; font-weight: 700; fill: #16191F; }
+    .h2 { font-size: 13px; font-weight: 700; fill: #16191F; }
+    .label { font-size: 12px; font-weight: 600; fill: #16191F; }
+    .sub { font-size: 11px; fill: #545B64; }
+    .group { font-size: 12px; font-weight: 700; fill: #16191F; }
+    .note { font-size: 12px; fill: #16191F; }
+    .muted { font-size: 11px; fill: #687078; }
+  </style>
+
+  <rect width="1800" height="1120" fill="#F7F8FA"/>
+  <text x="48" y="42" class="page h1">BRAZVIA Backend</text>
+  <text x="48" y="64" class="page sub">Produção · SAM · Lambda · Cognito · RDS PostgreSQL · S3</text>
+
+  <!-- Actors -->
+  <g id="visitantes">
+    <circle cx="120" cy="130" r="22" fill="#EAEDED" stroke="#545B64" stroke-width="1.5"/>
+    <circle cx="120" cy="120" r="8" fill="#545B64"/>
+    <path d="M102 148c4-12 12-18 18-18s14 6 18 18" fill="none" stroke="#545B64" stroke-width="1.5"/>
+    <text x="120" y="172" text-anchor="middle" class="page label">Visitantes</text>
+    <text x="120" y="188" text-anchor="middle" class="page muted">vitrine pública</text>
+  </g>
+  <g id="admin">
+    <rect x="1608" y="108" width="44" height="32" rx="4" fill="#EAEDED" stroke="#545B64" stroke-width="1.5"/>
+    <circle cx="1630" cy="116" r="6" fill="#545B64"/>
+    <path d="M1618 136c3-8 8-12 12-12s9 4 12 12" fill="none" stroke="#545B64" stroke-width="1.5"/>
+    <text x="1630" y="172" text-anchor="middle" class="page label">Admin</text>
+    <text x="1630" y="188" text-anchor="middle" class="page muted">/admin</text>
+  </g>
+
+  <!-- AWS Cloud -->
+  <g id="aws-cloud">
+    <rect x="40" y="210" width="1720" height="760" rx="12" fill="#FFFFFF" stroke="#FF9900" stroke-width="2"/>
+    <g transform="translate(60,228)">
+      <path d="M28 18c0-8 6-14 14-14 2-8 10-14 18-14 10 0 18 7 20 16 8 0 14 6 14 14 0 8-6 14-14 14H42c-8 0-14-6-14-16z" fill="#FF9900"/>
+      <text x="84" y="26" class="page group">AWS Cloud</text>
+    </g>
+    <text x="220" y="250" class="page muted">conta única · stack SAM</text>
+
+    <!-- Regional services (outside VPC) -->
+    <!-- CloudFront -->
+    <g id="cloudfront">
+      <rect x="80" y="280" width="150" height="110" rx="8" fill="#FFFFFF" stroke="#D5D7DA"/>
+      <rect x="128" y="296" width="54" height="44" rx="6" fill="#8C4FFF"/>
+      <text x="155" y="323" text-anchor="middle" fill="#FFFFFF" font-size="11" font-family="Arial" font-weight="700">CF</text>
+      <text x="155" y="360" text-anchor="middle" class="page label">Amazon CloudFront</text>
+      <text x="155" y="376" text-anchor="middle" class="page muted">SPA + fotos</text>
+    </g>
+    <!-- API Gateway -->
+    <g id="apigw">
+      <rect x="270" y="280" width="160" height="110" rx="8" fill="#FFFFFF" stroke="#D5D7DA"/>
+      <rect x="323" y="296" width="54" height="44" rx="6" fill="#A63437"/>
+      <text x="350" y="323" text-anchor="middle" fill="#FFFFFF" font-size="11" font-family="Arial" font-weight="700">API</text>
+      <text x="350" y="360" text-anchor="middle" class="page label">Amazon API Gateway</text>
+      <text x="350" y="376" text-anchor="middle" class="page muted">HTTP API</text>
+    </g>
+    <!-- Cognito -->
+    <g id="cognito">
+      <rect x="1470" y="280" width="160" height="110" rx="8" fill="#FFFFFF" stroke="#D5D7DA"/>
+      <rect x="1523" y="296" width="54" height="44" rx="6" fill="#C45500"/>
+      <text x="1550" y="323" text-anchor="middle" fill="#FFFFFF" font-size="10" font-family="Arial" font-weight="700">COG</text>
+      <text x="1550" y="360" text-anchor="middle" class="page label">Amazon Cognito</text>
+      <text x="1550" y="376" text-anchor="middle" class="page muted">User Pool · sem signup</text>
+    </g>
+    <!-- S3 front -->
+    <g id="s3-front">
+      <rect x="470" y="280" width="150" height="110" rx="8" fill="#FFFFFF" stroke="#D5D7DA"/>
+      <rect x="518" y="296" width="54" height="44" rx="6" fill="#7AA116"/>
+      <text x="545" y="323" text-anchor="middle" fill="#FFFFFF" font-size="11" font-family="Arial" font-weight="700">S3</text>
+      <text x="545" y="360" text-anchor="middle" class="page label">Amazon S3</text>
+      <text x="545" y="376" text-anchor="middle" class="page muted">bucket do front</text>
+    </g>
+    <!-- S3 media -->
+    <g id="s3-media">
+      <rect x="660" y="280" width="150" height="110" rx="8" fill="#FFFFFF" stroke="#D5D7DA"/>
+      <rect x="708" y="296" width="54" height="44" rx="6" fill="#7AA116"/>
+      <text x="735" y="323" text-anchor="middle" fill="#FFFFFF" font-size="11" font-family="Arial" font-weight="700">S3</text>
+      <text x="735" y="360" text-anchor="middle" class="page label">Amazon S3</text>
+      <text x="735" y="376" text-anchor="middle" class="page muted">bucket de mídia</text>
+    </g>
+    <!-- Secrets -->
+    <g id="secrets">
+      <rect x="850" y="280" width="160" height="110" rx="8" fill="#FFFFFF" stroke="#D5D7DA"/>
+      <rect x="723" y="0" width="0" height="0"/>
+      <rect x="903" y="296" width="54" height="44" rx="6" fill="#DD344C"/>
+      <text x="930" y="323" text-anchor="middle" fill="#FFFFFF" font-size="10" font-family="Arial" font-weight="700">SM</text>
+      <text x="930" y="360" text-anchor="middle" class="page label">Secrets Manager</text>
+      <text x="930" y="376" text-anchor="middle" class="page muted">senha do Postgres</text>
+    </g>
+
+    <!-- Number badges for regional -->
+    <g>
+      <circle cx="215" cy="288" r="12" fill="#16191F"/><text x="215" y="292" text-anchor="middle" fill="#FFF" font-size="11" font-family="Arial" font-weight="700">2</text>
+      <circle cx="415" cy="288" r="12" fill="#16191F"/><text x="415" y="292" text-anchor="middle" fill="#FFF" font-size="11" font-family="Arial" font-weight="700">4</text>
+      <circle cx="795" cy="288" r="12" fill="#16191F"/><text x="795" y="292" text-anchor="middle" fill="#FFF" font-size="11" font-family="Arial" font-weight="700">3</text>
+      <circle cx="1615" cy="288" r="12" fill="#16191F"/><text x="1615" y="292" text-anchor="middle" fill="#FFF" font-size="11" font-family="Arial" font-weight="700">5</text>
+    </g>
+
+    <!-- Production VPC -->
+    <g id="vpc">
+      <rect x="80" y="430" width="1640" height="510" rx="10" fill="#FCFAFF" stroke="#8C4FFF" stroke-width="2" stroke-dasharray="7 4"/>
+      <text x="100" y="456" class="page group" fill="#8C4FFF">Production VPC</text>
+      <text x="230" y="456" class="page muted">2 AZs · subnets privadas · sem NAT Gateway</text>
+
+      <!-- Public subnet -->
+      <g id="public-subnet">
+        <rect x="110" y="478" width="1580" height="140" rx="8" fill="#F2F8E8" stroke="#7AA116" stroke-width="1.5"/>
+        <text x="128" y="502" class="page group" fill="#3F6C00">Public subnet</text>
+        <text x="250" y="502" class="page muted">sem compute · só endpoints de VPC</text>
+
+        <g>
+          <rect x="150" y="524" width="200" height="70" rx="8" fill="#FFFFFF" stroke="#D5D7DA"/>
+          <rect x="166" y="540" width="36" height="36" rx="4" fill="#7AA116"/>
+          <text x="216" y="554" class="page label">VPC Endpoint</text>
+          <text x="216" y="572" class="page muted">Gateway · Amazon S3</text>
+        </g>
+        <g>
+          <rect x="380" y="524" width="230" height="70" rx="8" fill="#FFFFFF" stroke="#D5D7DA"/>
+          <rect x="396" y="540" width="36" height="36" rx="4" fill="#DD344C"/>
+          <text x="446" y="554" class="page label">VPC Endpoint</text>
+          <text x="446" y="572" class="page muted">Interface · Secrets Manager</text>
+        </g>
+        <text x="640" y="564" class="page muted">Lambda alcança S3 e Secrets sem NAT (custo).</text>
+      </g>
+
+      <!-- Private subnet -->
+      <g id="private-subnet">
+        <rect x="110" y="640" width="1580" height="270" rx="8" fill="#E8F4FC" stroke="#147EBA" stroke-width="1.5"/>
+        <text x="128" y="664" class="page group" fill="#0A4A73">Private subnet</text>
+        <text x="250" y="664" class="page muted">Lambda ENI + RDS · SG 5432 só da função</text>
+
+        <!-- Lambda -->
+        <g id="lambda">
+          <rect x="220" y="700" width="220" height="130" rx="8" fill="#FFFFFF" stroke="#D5D7DA"/>
+          <rect x="303" y="720" width="54" height="44" rx="6" fill="#C45500"/>
+          <text x="330" y="747" text-anchor="middle" fill="#FFFFFF" font-size="10" font-family="Arial" font-weight="700">λ</text>
+          <text x="330" y="768" text-anchor="middle" class="page label">AWS Lambda</text>
+          <text x="330" y="786" text-anchor="middle" class="page muted">API · FastAPI + Mangum</text>
+          <text x="330" y="802" text-anchor="middle" class="page muted">Python 3.12 · ARM64</text>
+        </g>
+
+        <!-- RDS -->
+        <g id="rds">
+          <rect x="620" y="700" width="240" height="130" rx="8" fill="#FFFFFF" stroke="#D5D7DA"/>
+          <rect x="713" y="720" width="54" height="44" rx="6" fill="#3B48CC"/>
+          <text x="740" y="747" text-anchor="middle" fill="#FFFFFF" font-size="10" font-family="Arial" font-weight="700">RDS</text>
+          <text x="740" y="768" text-anchor="middle" class="page label">Amazon RDS</text>
+          <text x="740" y="786" text-anchor="middle" class="page muted">PostgreSQL 16 · t4g.micro</text>
+          <text x="740" y="802" text-anchor="middle" class="page muted">properties + property_images</text>
+        </g>
+
+        <circle cx="200" cy="708" r="12" fill="#16191F"/>
+        <text x="200" y="712" text-anchor="middle" fill="#FFF" font-size="11" font-family="Arial" font-weight="700">1</text>
+
+        <!-- arrow lambda to rds -->
+        <line x1="440" y1="765" x2="620" y2="765" stroke="#545B64" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <text x="530" y="752" text-anchor="middle" class="page muted">SQL · 5432</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Flows from actors -->
+  <line x1="120" y1="196" x2="155" y2="280" stroke="#545B64" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="90" y="236" class="page muted">HTML/imagens</text>
+
+  <line x1="150" y1="150" x2="300" y2="280" stroke="#545B64" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="200" y="210" class="page muted">GET /v1/properties</text>
+
+  <line x1="1630" y1="196" x2="1560" y2="280" stroke="#C45500" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrow-orange)"/>
+  <text x="1688" y="236" class="page muted">login PKCE</text>
+
+  <line x1="1600" y1="150" x2="430" y2="280" stroke="#545B64" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="1100" y="168" class="page muted">Authorization Bearer · /v1/admin/*</text>
+
+  <!-- Cognito to API GW authorizer -->
+  <line x1="1470" y1="335" x2="430" y2="335" stroke="#C45500" stroke-width="1.4" stroke-dasharray="5 4" marker-end="url(#arrow-orange)"/>
+  <text x="980" y="326" text-anchor="middle" class="page muted">authorizer JWT</text>
+
+  <!-- API GW to Lambda -->
+  <path d="M350 390 V430" stroke="#545B64" stroke-width="1.5" fill="none"/>
+  <path d="M350 430 C350 500 330 640 330 700" stroke="#545B64" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+  <text x="366" y="560" class="page muted">invoke</text>
+
+  <!-- CloudFront to S3 -->
+  <line x1="230" y1="335" x2="470" y2="335" stroke="#545B64" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Lambda to secrets / s3 (logical) -->
+  <path d="M280 700 C180 700 160 430 160 390" stroke="#545B64" stroke-width="1.2" stroke-dasharray="5 4" fill="none"/>
+  <text x="86" y="560" class="page muted">via VPC</text>
+  <text x="80" y="574" class="page muted">endpoint</text>
+
+  <!-- Caption / numbered walkthrough -->
+  <g id="legend">
+    <rect x="40" y="988" width="1720" height="108" rx="8" fill="#FFFFFF" stroke="#D5D7DA"/>
+    <text x="60" y="1014" class="page h2">Walkthrough</text>
+    <text x="60" y="1038" class="page note"><tspan fill="#16191F" font-weight="700">1 </tspan>Lambda + RDS na subnet privada — plano de dados.</text>
+    <text x="60" y="1058" class="page note"><tspan fill="#16191F" font-weight="700">2 </tspan>CloudFront + S3 servem o SPA e as fotos. A API não entrega HTML.</text>
+    <text x="60" y="1078" class="page note"><tspan fill="#16191F" font-weight="700">3 </tspan>Upload: browser faz PUT no S3 com URL pré-assinada. Foto não passa pela Lambda.</text>
+    <text x="920" y="1038" class="page note"><tspan fill="#16191F" font-weight="700">4 </tspan>API Gateway: rotas públicas abertas; /v1/admin/* exige JWT.</text>
+    <text x="920" y="1058" class="page note"><tspan fill="#16191F" font-weight="700">5 </tspan>Cognito User Pool só para o admin — convite, sem self-signup.</text>
+    <text x="920" y="1078" class="page muted">Linha tracejada = auth / authorizer. Linha sólida = tráfego de aplicação.</text>
+  </g>
+</svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 400" fill="none">
+  <defs>
+    <linearGradient id="gold" x1="40" y1="20" x2="300" y2="320" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F0D78C"/>
+      <stop offset="0.45" stop-color="#C9A227"/>
+      <stop offset="1" stop-color="#8B6914"/>
+    </linearGradient>
+  </defs>
+  <rect x="42" y="70" width="28" height="180" rx="3" fill="url(#gold)"/>
+  <rect x="78" y="36" width="30" height="214" rx="3" fill="url(#gold)"/>
+  <path fill="url(#gold)" d="M116 36h92c48 0 82 28 82 74 0 32-16 54-44 66 38 12 62 38 62 76 0 52-40 84-96 84H116V36zm58 46v82h34c24 0 38-12 38-32s-14-32-38-32h-34zm0 122v88h42c28 0 46-14 46-38s-18-50-48-50h-40z"/>
+  <path fill="#0E0E0E" d="M158 118h42l22 18v42h-20v-28h-24v28h-20V118z"/>
+  <text x="180" y="320" text-anchor="middle" fill="url(#gold)" font-family="Arial Black, Helvetica, sans-serif" font-size="38" letter-spacing="10">BRΛZVIA</text>
+  <text x="180" y="348" text-anchor="middle" fill="#C9A227" font-family="Helvetica, Arial, sans-serif" font-size="10" letter-spacing="4">NEGÓCIOS IMOBILIÁRIOS</text>
+  <text x="180" y="372" text-anchor="middle" fill="#A08A4A" font-family="Helvetica, Arial, sans-serif" font-size="8" letter-spacing="3">MAIS QUE IMÓVEIS, NOVOS CAMINHOS</text>
+</svg>
