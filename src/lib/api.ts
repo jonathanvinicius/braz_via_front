@@ -1,6 +1,6 @@
 import { getAdminToken, clearAdminToken } from './auth';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3333/api';
+const API_URL = import.meta.env.API_URL ?? 'http://localhost:3333/api';
 
 type ApiOptions = RequestInit & {
   auth?: boolean;

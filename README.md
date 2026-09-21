@@ -37,7 +37,7 @@ npm install && npm run db:migrate && npm run db:seed && npm run dev
 `.env` deste front:
 
 ```
-VITE_API_URL=http://localhost:3333/api
+API_URL=http://localhost:3333/api
 ```
 
 Admin: http://localhost:5174/admin — `admin@brazvia.local` + qualquer senha (mock).
