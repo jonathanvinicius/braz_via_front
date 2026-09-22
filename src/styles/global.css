@@ -1220,30 +1220,107 @@ a {
   margin-top: 0.75rem;
 }
 
+.admin-photo-hint {
+  margin: 0.35rem 0 0.75rem;
+}
+
 .admin-photo {
   position: relative;
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid var(--line);
+  background: #111;
+  cursor: grab;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.admin-photo.is-cover {
+  border-color: rgba(201, 162, 39, 0.7);
+  box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.22);
+}
+
+.admin-photo.is-dragging {
+  opacity: 0.55;
+  cursor: grabbing;
+}
+
+.admin-photo.is-drop-target {
+  border-color: var(--gold-deep);
+  box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.35);
 }
 
 .admin-photo img {
   width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
+  display: block;
+  pointer-events: none;
 }
 
-.admin-photo button {
+.admin-photo-badge {
+  position: absolute;
+  top: 0.45rem;
+  left: 0.45rem;
+  z-index: 2;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--gold-bright), var(--gold));
+  color: #111;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-photo-handle {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  z-index: 2;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0.4rem 0.35rem;
+  border-radius: 8px;
+  background: rgba(14, 14, 14, 0.55);
+}
+
+.admin-photo-handle span {
+  display: block;
+  width: 14px;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.admin-photo-controls {
   position: absolute;
   left: 0.4rem;
   right: 0.4rem;
   bottom: 0.4rem;
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 0.3rem;
+}
+
+.admin-photo-controls button {
   border: 0;
   border-radius: 999px;
   padding: 0.35rem 0.5rem;
-  background: rgba(14, 14, 14, 0.75);
+  background: rgba(14, 14, 14, 0.78);
   color: #fff;
   cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+}
+
+.admin-photo-controls button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.admin-photo-controls .admin-photo-remove {
+  grid-column: 3;
 }
 
 .admin-form-actions {

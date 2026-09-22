@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type DragEvent,
+  type FormEvent,
+} from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useProperties } from '../../context/PropertiesContext';
 import { regions, type Property } from '../../data/properties';
@@ -69,6 +75,10 @@ export function AdminFormPage() {
     () => (existing?.highlights ?? []).join('\n'),
   );
   const [error, setError] = useState('');
+  const [draggingImageIndex, setDraggingImageIndex] = useState<number | null>(
+    null,
+  );
+  const [overImageIndex, setOverImageIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!existing) return;
@@ -115,20 +125,84 @@ export function AdminFormPage() {
       const uploaded = await Promise.all(
         Array.from(files).map((file) => uploadImage(file)),
       );
-      setForm((current) => ({
-        ...current,
-        images: [...(current.images ?? []), ...uploaded.map((item) => item.url)],
-      }));
+      setForm((current) => {
+        const images = [
+          ...(current.images ?? []),
+          ...uploaded.map((item) => item.url),
+        ];
+        return {
+          ...current,
+          images,
+          image: images[0] || '',
+        };
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Falha no upload da imagem');
     }
   };
 
   const removeImage = (index: number) => {
-    setForm((current) => ({
-      ...current,
-      images: (current.images ?? []).filter((_, i) => i !== index),
-    }));
+    setForm((current) => {
+      const images = (current.images ?? []).filter((_, i) => i !== index);
+      return {
+        ...current,
+        images,
+        image: images[0] || '',
+      };
+    });
+  };
+
+  const moveImage = (fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) return;
+    setForm((current) => {
+      const images = [...(current.images ?? [])];
+      if (
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= images.length ||
+        toIndex >= images.length
+      ) {
+        return current;
+      }
+      const [moved] = images.splice(fromIndex, 1);
+      images.splice(toIndex, 0, moved);
+      return {
+        ...current,
+        images,
+        image: images[0] || '',
+      };
+    });
+  };
+
+  const onImageDragStart = (
+    event: DragEvent<HTMLDivElement>,
+    index: number,
+  ) => {
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', String(index));
+    setDraggingImageIndex(index);
+  };
+
+  const onImageDragOver = (
+    event: DragEvent<HTMLDivElement>,
+    index: number,
+  ) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    if (index !== overImageIndex) setOverImageIndex(index);
+  };
+
+  const onImageDrop = (event: DragEvent<HTMLDivElement>, toIndex: number) => {
+    event.preventDefault();
+    const raw =
+      draggingImageIndex !== null
+        ? String(draggingImageIndex)
+        : event.dataTransfer.getData('text/plain');
+    const fromIndex = Number(raw);
+    setDraggingImageIndex(null);
+    setOverImageIndex(null);
+    if (Number.isNaN(fromIndex)) return;
+    moveImage(fromIndex, toIndex);
   };
 
   const onSubmit = async (event: FormEvent) => {
@@ -152,9 +226,12 @@ export function AdminFormPage() {
       return;
     }
 
+    const images = form.images ?? [];
     const payload: PropertyInput = {
       ...form,
       slug: previewSlug,
+      images,
+      image: images[0] || '',
       tags: tagsText
         .split(',')
         .map((item) => item.trim())
@@ -411,6 +488,10 @@ export function AdminFormPage() {
 
         <div className="field">
           <span>Fotos *</span>
+          <p className="admin-muted admin-photo-hint">
+            Arraste as fotos para reordenar. A primeira imagem é a capa do
+            anúncio.
+          </p>
           <input
             type="file"
             accept="image/*"
@@ -421,14 +502,70 @@ export function AdminFormPage() {
             }}
           />
           <div className="admin-photo-grid">
-            {(form.images ?? []).map((src, index) => (
-              <div key={src.slice(0, 40) + index} className="admin-photo">
-                <img src={src} alt="" />
-                <button type="button" onClick={() => removeImage(index)}>
-                  Remover
-                </button>
-              </div>
-            ))}
+            {(form.images ?? []).map((src, index) => {
+              const imagesCount = form.images?.length ?? 0;
+              return (
+                <div
+                  key={`${src}-${index}`}
+                  className={[
+                    'admin-photo',
+                    draggingImageIndex === index ? 'is-dragging' : '',
+                    overImageIndex === index && draggingImageIndex !== index
+                      ? 'is-drop-target'
+                      : '',
+                    index === 0 ? 'is-cover' : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  draggable
+                  onDragStart={(event) => onImageDragStart(event, index)}
+                  onDragOver={(event) => onImageDragOver(event, index)}
+                  onDrop={(event) => onImageDrop(event, index)}
+                  onDragEnd={() => {
+                    setDraggingImageIndex(null);
+                    setOverImageIndex(null);
+                  }}
+                >
+                  <img src={src} alt="" />
+                  {index === 0 ? (
+                    <span className="admin-photo-badge">Capa</span>
+                  ) : null}
+                  <span
+                    className="admin-photo-handle"
+                    title="Arrastar para reordenar"
+                  >
+                    <span />
+                    <span />
+                    <span />
+                  </span>
+                  <div className="admin-photo-controls">
+                    <button
+                      type="button"
+                      disabled={index === 0}
+                      aria-label="Mover para a esquerda"
+                      onClick={() => moveImage(index, index - 1)}
+                    >
+                      ←
+                    </button>
+                    <button
+                      type="button"
+                      disabled={index >= imagesCount - 1}
+                      aria-label="Mover para a direita"
+                      onClick={() => moveImage(index, index + 1)}
+                    >
+                      →
+                    </button>
+                    <button
+                      type="button"
+                      className="admin-photo-remove"
+                      onClick={() => removeImage(index)}
+                    >
+                      Remover
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
