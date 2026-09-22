@@ -1,15 +1,18 @@
 import {
   createContext,
+  useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from 'react';
-import { api } from '../lib/api';
+import { api, ApiError } from '../lib/api';
 import {
   clearAdminToken,
   getAdminToken,
   setAdminToken,
+  type AdminUser,
 } from '../lib/auth';
 
 export type LoginSuccess = { status: 'authenticated' };
@@ -29,8 +32,12 @@ type AuthLoginResponse = {
   email?: string;
 };
 
+type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
+
 type AuthContextValue = {
   token: string | null;
+  user: AdminUser | null;
+  status: AuthStatus;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<LoginResult>;
   completeNewPassword: (
@@ -39,17 +46,83 @@ type AuthContextValue = {
     session: string,
   ) => Promise<void>;
   logout: () => void;
+  refreshSession: () => Promise<boolean>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(() => getAdminToken());
+  const [user, setUser] = useState<AdminUser | null>(null);
+  const [status, setStatus] = useState<AuthStatus>(() =>
+    getAdminToken() ? 'loading' : 'unauthenticated',
+  );
+
+  const clearSession = useCallback(() => {
+    clearAdminToken();
+    setToken(null);
+    setUser(null);
+    setStatus('unauthenticated');
+  }, []);
+
+  const refreshSession = useCallback(async () => {
+    const currentToken = getAdminToken();
+    if (!currentToken) {
+      clearSession();
+      return false;
+    }
+
+    try {
+      const me = await api<AdminUser>('/auth/me');
+      if (me.role !== 'admin') {
+        clearSession();
+        return false;
+      }
+      setToken(currentToken);
+      setUser(me);
+      setStatus('authenticated');
+      return true;
+    } catch (error) {
+      clearSession();
+      if (error instanceof ApiError) {
+        return false;
+      }
+      return false;
+    }
+  }, [clearSession]);
+
+  useEffect(() => {
+    void refreshSession();
+  }, [refreshSession]);
+
+  useEffect(() => {
+    const onAuthCleared = () => {
+      clearSession();
+    };
+    window.addEventListener('brazvia:auth-cleared', onAuthCleared);
+    return () => {
+      window.removeEventListener('brazvia:auth-cleared', onAuthCleared);
+    };
+  }, [clearSession]);
+
+  const establishSession = useCallback(
+    async (accessToken: string) => {
+      setAdminToken(accessToken);
+      setToken(accessToken);
+      const ok = await refreshSession();
+      if (!ok) {
+        throw new Error('Acesso restrito a administradores.');
+      }
+    },
+    [refreshSession],
+  );
 
   const value = useMemo<AuthContextValue>(
     () => ({
       token,
-      isAuthenticated: Boolean(token),
+      user,
+      status,
+      isAuthenticated: status === 'authenticated' && Boolean(user),
       login: async (email, password) => {
         const result = await api<AuthLoginResponse>('/auth/login', {
           method: 'POST',
@@ -71,8 +144,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           throw new Error('Token de acesso não retornado');
         }
 
-        setAdminToken(result.accessToken);
-        setToken(result.accessToken);
+        await establishSession(result.accessToken);
         return { status: 'authenticated' };
       },
       completeNewPassword: async (email, newPassword, session) => {
@@ -86,15 +158,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!result.accessToken) {
           throw new Error('Token de acesso não retornado');
         }
-        setAdminToken(result.accessToken);
-        setToken(result.accessToken);
+        await establishSession(result.accessToken);
       },
       logout: () => {
-        clearAdminToken();
-        setToken(null);
+        clearSession();
       },
+      refreshSession,
     }),
-    [token],
+    [token, user, status, establishSession, clearSession, refreshSession],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

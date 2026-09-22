@@ -3,7 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 export function AdminLoginPage() {
-  const { isAuthenticated, login, completeNewPassword } = useAuth();
+  const { status, isAuthenticated, login, completeNewPassword } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -12,6 +12,16 @@ export function AdminLoginPage() {
   const [session, setSession] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  if (status === 'loading') {
+    return (
+      <div className="admin-shell">
+        <main className="container admin-main">
+          <p>Validando sessão…</p>
+        </main>
+      </div>
+    );
+  }
 
   if (isAuthenticated) {
     return <Navigate to="/admin" replace />;

@@ -15,6 +15,24 @@ export class ApiError extends Error {
   }
 }
 
+async function readErrorMessage(
+  response: Response,
+  fallback: string,
+): Promise<string> {
+  try {
+    const body = (await response.json()) as { message?: string | string[] };
+    if (Array.isArray(body.message) && body.message.length > 0) {
+      return body.message.join(' ');
+    }
+    if (typeof body.message === 'string' && body.message.trim()) {
+      return body.message;
+    }
+  } catch {
+    // ignore
+  }
+  return fallback;
+}
+
 export async function api<T>(path: string, options: ApiOptions = {}): Promise<T> {
   const headers = new Headers(options.headers);
   const isFormData = options.body instanceof FormData;
@@ -23,8 +41,11 @@ export async function api<T>(path: string, options: ApiOptions = {}): Promise<T>
     headers.set('Content-Type', 'application/json');
   }
 
+  const isCredentialAuthPath =
+    path.startsWith('/auth/login') || path.startsWith('/auth/complete-password');
+
   const token = getAdminToken();
-  if (token) {
+  if (token && !isCredentialAuthPath) {
     headers.set('Authorization', `Bearer ${token}`);
   }
 
@@ -33,23 +54,28 @@ export async function api<T>(path: string, options: ApiOptions = {}): Promise<T>
     headers,
   });
 
-  if (response.status === 401) {
-    clearAdminToken();
-    throw new ApiError('Sessão expirada. Faça login novamente.', 401);
+  if (response.status === 401 || response.status === 403) {
+    if (!isCredentialAuthPath) {
+      clearAdminToken();
+      window.dispatchEvent(new Event('brazvia:auth-cleared'));
+    }
+
+    const fallback =
+      response.status === 403
+        ? 'Acesso restrito a administradores.'
+        : isCredentialAuthPath
+          ? 'Credenciais inválidas.'
+          : 'Sessão expirada. Faça login novamente.';
+
+    const message = await readErrorMessage(response, fallback);
+    throw new ApiError(message, response.status);
   }
 
   if (!response.ok) {
-    let message = 'Não foi possível concluir a operação.';
-    try {
-      const body = (await response.json()) as { message?: string | string[] };
-      if (Array.isArray(body.message)) {
-        message = body.message.join(' ');
-      } else if (typeof body.message === 'string') {
-        message = body.message;
-      }
-    } catch {
-      // ignore
-    }
+    const message = await readErrorMessage(
+      response,
+      'Não foi possível concluir a operação.',
+    );
     throw new ApiError(message, response.status);
   }
 

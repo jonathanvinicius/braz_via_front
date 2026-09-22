@@ -10,10 +10,22 @@ import { AdminLoginPage } from './pages/admin/AdminLoginPage';
 import type { ReactNode } from 'react';
 
 function RequireAdmin({ children }: { children: ReactNode }) {
-  const { isAuthenticated } = useAuth();
+  const { status, isAuthenticated } = useAuth();
+
+  if (status === 'loading') {
+    return (
+      <div className="admin-shell">
+        <main className="container admin-main">
+          <p>Validando sessão…</p>
+        </main>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return <Navigate to="/admin/login" replace />;
   }
+
   return children;
 }
 
