@@ -1,3 +1,7 @@
+import { getBrokerWhatsAppLink, openWhatsApp } from '../data/properties';
+
+const ANNOUNCE_MESSAGE = 'Olá! Quero anunciar meu imóvel na BRAZVIA.';
+
 export function CtaBanner() {
   return (
     <section className="cta-banner" id="anunciar">
@@ -10,7 +14,14 @@ export function CtaBanner() {
             inteligentes e acompanhamento comercial.
           </p>
         </div>
-        <a className="btn-gold" href="#contato">
+        <a
+          className="btn-gold"
+          href={getBrokerWhatsAppLink(ANNOUNCE_MESSAGE)}
+          onClick={(event) => {
+            event.preventDefault();
+            openWhatsApp(ANNOUNCE_MESSAGE);
+          }}
+        >
           Quero anunciar
         </a>
       </div>

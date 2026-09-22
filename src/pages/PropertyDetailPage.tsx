@@ -127,10 +127,12 @@ export function PropertyDetailPage() {
                 <a
                   className="btn-gold"
                   href={getWhatsAppLink(property)}
-                  target="_blank"
-                  rel="noreferrer"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    window.location.assign(getWhatsAppLink(property));
+                  }}
                 >
-                  Falar no WhatsApp
+                  Falar com corretor
                 </a>
                 <a className="btn-outline dark" href="tel:+5562991518816">
                   Ligar agora
@@ -161,8 +163,10 @@ export function PropertyDetailPage() {
               <a
                 className="btn-gold"
                 href={getWhatsAppLink(property)}
-                target="_blank"
-                rel="noreferrer"
+                onClick={(event) => {
+                  event.preventDefault();
+                  window.location.assign(getWhatsAppLink(property));
+                }}
               >
                 Quero visitar
               </a>

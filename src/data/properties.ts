@@ -142,29 +142,7 @@ export const properties: Property[] = [
     description: 'Apartamento alto padrão com lazer completo no Setor Bueno.',
     highlights: ['3 quartos', '2 vagas', 'Lazer completo'],
   },
-  {
-    id: '3',
-    slug: 'cobertura-asa-sul',
-    title: 'Cobertura duplex com terraço gourmet',
-    region: 'brasilia',
-    regionLabel: 'Brasília',
-    neighborhood: 'Asa Sul',
-    size: 320,
-    bedrooms: 4,
-    bathrooms: 4,
-    parking: 4,
-    price: 2450000,
-    type: 'Cobertura',
-    tags: ['Gourmet', 'Luxo'],
-    image:
-      'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=80',
-    images: [
-      'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=80',
-    ],
-    featured: true,
-    description: 'Cobertura duplex com terraço gourmet na Asa Sul.',
-    highlights: ['Duplex', 'Terraço gourmet', '4 vagas'],
-  },
+
   {
     id: '4',
     slug: 'casa-vila-jaiara',
@@ -289,11 +267,22 @@ export function getPropertyBySlug(slug: string) {
   return properties.find((property) => property.slug === slug);
 }
 
+export const WHATSAPP_PHONE = '5562991518816';
+
+export function getBrokerWhatsAppLink(
+  message = 'Olá! Gostaria de falar com um corretor da BRAZVIA.',
+) {
+  return `https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encodeURIComponent(message)}`;
+}
+
 export function getWhatsAppLink(property: Property) {
-  const phone = '5562991518816';
-  const text = encodeURIComponent(
+  const message =
     property.whatsappMessage ??
-      `Olá! Tenho interesse no imóvel ${property.title} (${property.neighborhood}).`,
-  );
-  return `https://wa.me/${phone}?text=${text}`;
+    `Olá! Tenho interesse no imóvel ${property.title} (${property.neighborhood}).`;
+  return getBrokerWhatsAppLink(message);
+}
+
+export function openWhatsApp(message?: string) {
+  const url = getBrokerWhatsAppLink(message);
+  window.location.assign(url);
 }

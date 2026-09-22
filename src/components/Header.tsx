@@ -1,6 +1,10 @@
+import { getBrokerWhatsAppLink, openWhatsApp } from '../data/properties';
+
 type HeaderProps = {
   onOpenFilters?: () => void;
 };
+
+const BROKER_WHATSAPP_URL = getBrokerWhatsAppLink();
 
 export function Header({ onOpenFilters }: HeaderProps) {
   return (
@@ -25,7 +29,14 @@ export function Header({ onOpenFilters }: HeaderProps) {
           <button type="button" className="btn-ghost" onClick={onOpenFilters}>
             Filtrar
           </button>
-          <a className="btn-gold" href="#contato">
+          <a
+            className="btn-gold"
+            href={BROKER_WHATSAPP_URL}
+            onClick={(event) => {
+              event.preventDefault();
+              openWhatsApp();
+            }}
+          >
             Falar com corretor
           </a>
         </div>

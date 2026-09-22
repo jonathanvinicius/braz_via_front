@@ -1,5 +1,6 @@
 import { useEffect, useState, type DragEvent } from 'react';
 import { Link } from 'react-router-dom';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { useProperties } from '../../context/PropertiesContext';
 import { formatPrice, type Property } from '../../data/properties';
 
@@ -10,6 +11,9 @@ export function AdminListPage() {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<Property | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   useEffect(() => {
     setItems(properties);
@@ -53,6 +57,28 @@ export function AdminListPage() {
       setItems(properties);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const closeDeleteDialog = () => {
+    if (deleting) return;
+    setPendingDelete(null);
+    setDeleteError('');
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      await deleteProperty(pendingDelete.id);
+      setPendingDelete(null);
+    } catch (err) {
+      setDeleteError(
+        err instanceof Error ? err.message : 'Não foi possível excluir o anúncio.',
+      );
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -114,7 +140,10 @@ export function AdminListPage() {
                 }
               >
                 <td>
-                  <span className="admin-drag-handle" title="Arrastar para reordenar">
+                  <span
+                    className="admin-drag-handle"
+                    title="Arrastar para reordenar"
+                  >
                     <span />
                     <span />
                     <span />
@@ -148,9 +177,8 @@ export function AdminListPage() {
                       type="button"
                       className="link-danger"
                       onClick={() => {
-                        if (confirm(`Excluir "${property.title}"?`)) {
-                          void deleteProperty(property.id);
-                        }
+                        setDeleteError('');
+                        setPendingDelete(property);
                       }}
                     >
                       Excluir
@@ -162,6 +190,41 @@ export function AdminListPage() {
           </tbody>
         </table>
       </div>
+
+      <ConfirmDialog
+        open={Boolean(pendingDelete)}
+        tone="danger"
+        busy={deleting}
+        title="Excluir este anúncio?"
+        description={
+          pendingDelete
+            ? deleteError
+              ? deleteError
+              : `“${pendingDelete.title}” será removido da vitrine e do painel. Essa ação não pode ser desfeita.`
+            : ''
+        }
+        confirmLabel="Excluir anúncio"
+        cancelLabel="Manter anúncio"
+        onCancel={closeDeleteDialog}
+        onConfirm={() => {
+          void confirmDelete();
+        }}
+        preview={
+          pendingDelete ? (
+            <div className="confirm-dialog-property">
+              <img src={pendingDelete.image} alt="" />
+              <div>
+                <strong>{pendingDelete.title}</strong>
+                <span>
+                  {pendingDelete.regionLabel} · {pendingDelete.neighborhood}
+                </span>
+                <span>{formatPrice(pendingDelete.price)}</span>
+              </div>
+            </div>
+          ) : null
+        }
+      />
+
     </section>
   );
 }
