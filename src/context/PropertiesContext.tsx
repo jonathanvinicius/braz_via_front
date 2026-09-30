@@ -4,11 +4,13 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
 import type { Property } from '../data/properties';
 import { api } from '../lib/api';
+import { readPropertyList, writePropertyList } from '../lib/propertyListCache';
 import { findPropertyByRouteKey, publicSlugMap } from '../lib/propertyUrl';
 import type { PropertyInput } from '../lib/propertyStore';
 
@@ -36,16 +38,25 @@ function sortByOrder(items: Property[]) {
 const PropertiesContext = createContext<PropertiesContextValue | null>(null);
 
 export function PropertiesProvider({ children }: { children: ReactNode }) {
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [loading, setLoading] = useState(true);
+  const storedList = useRef(readPropertyList());
+  const [properties, setProperties] = useState<Property[]>(
+    () => storedList.current ?? [],
+  );
+  const [loading, setLoading] = useState(storedList.current === null);
   const [error, setError] = useState('');
 
   const refresh = useCallback(async () => {
     setError('');
-    setLoading(true);
+    if (storedList.current === null) setLoading(true);
     try {
       const data = await api<Property[]>('/properties');
-      setProperties(sortByOrder(data));
+      if (!Array.isArray(data)) {
+        throw new Error('Erro ao carregar imóveis');
+      }
+      const next = sortByOrder(data);
+      setProperties(next);
+      writePropertyList(next);
+      storedList.current = next;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar imóveis');
     } finally {

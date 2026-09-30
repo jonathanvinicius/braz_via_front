@@ -24,7 +24,7 @@ const initialFilters: Filters = {
 
 export function HomePage() {
   const { hash } = useLocation();
-  const { properties } = useProperties();
+  const { properties, loading } = useProperties();
   const [region, setRegion] = useState<RegionId>('todas');
   const [filters, setFilters] = useState<Filters>(initialFilters);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -106,8 +106,9 @@ export function HomePage() {
               <div>
                 <h2>Imóveis disponíveis</h2>
                 <p>
-                  {filtered.length}{' '}
-                  {filtered.length === 1 ? 'resultado' : 'resultados'}
+                  {loading && properties.length === 0
+                    ? 'Carregando imóveis…'
+                    : `${filtered.length} ${filtered.length === 1 ? 'resultado' : 'resultados'}`}
                 </p>
               </div>
               <button
@@ -118,7 +119,7 @@ export function HomePage() {
                 Abrir filtros
               </button>
             </div>
-            <PropertyGrid items={filtered} />
+            <PropertyGrid items={filtered} loading={loading && properties.length === 0} />
           </div>
         </div>
       </section>

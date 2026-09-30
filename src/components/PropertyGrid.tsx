@@ -3,9 +3,18 @@ import { PropertyCard } from './PropertyCard';
 
 type Props = {
   items: Property[];
+  loading?: boolean;
 };
 
-export function PropertyGrid({ items }: Props) {
+export function PropertyGrid({ items, loading = false }: Props) {
+  if (loading && items.length === 0) {
+    return (
+      <div className="empty-state" aria-busy="true" aria-live="polite">
+        <p>Carregando imóveis…</p>
+      </div>
+    );
+  }
+
   if (items.length === 0) {
     return (
       <div className="empty-state">
