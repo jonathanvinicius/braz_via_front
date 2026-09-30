@@ -9,6 +9,7 @@ import {
 } from 'react';
 import type { Property } from '../data/properties';
 import { api } from '../lib/api';
+import { findPropertyByRouteKey, publicSlugMap } from '../lib/propertyUrl';
 import type { PropertyInput } from '../lib/propertyStore';
 
 type PropertiesContextValue = {
@@ -17,6 +18,7 @@ type PropertiesContextValue = {
   error: string;
   refresh: () => Promise<void>;
   getBySlug: (slug: string) => Property | undefined;
+  publicSlug: (property: Property) => string;
   getById: (id: string) => Property | undefined;
   createProperty: (input: PropertyInput) => Promise<Property>;
   updateProperty: (id: string, input: PropertyInput) => Promise<Property>;
@@ -55,13 +57,16 @@ export function PropertiesProvider({ children }: { children: ReactNode }) {
     void refresh();
   }, [refresh]);
 
+  const publicSlugs = useMemo(() => publicSlugMap(properties), [properties]);
+
   const value = useMemo<PropertiesContextValue>(
     () => ({
       properties,
       loading,
       error,
       refresh,
-      getBySlug: (slug) => properties.find((item) => item.slug === slug),
+      getBySlug: (slug) => findPropertyByRouteKey(properties, publicSlugs, slug),
+      publicSlug: (property) => publicSlugs.get(property.id) ?? property.slug,
       getById: (id) => properties.find((item) => item.id === id),
       createProperty: async (input) => {
         const created = await api<Property>('/properties', {
@@ -93,7 +98,7 @@ export function PropertiesProvider({ children }: { children: ReactNode }) {
         setProperties((current) => current.filter((item) => item.id !== id));
       },
     }),
-    [properties, loading, error, refresh],
+    [properties, publicSlugs, loading, error, refresh],
   );
 
   return (

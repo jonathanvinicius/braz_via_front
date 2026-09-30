@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
+import { Seo } from '../../components/Seo';
 import { useAuth } from '../../context/AuthContext';
+import { SITE_ORIGIN } from '../../lib/site';
 
 export function AdminLoginPage() {
   const { status, isAuthenticated, login, completeNewPassword } = useAuth();
@@ -16,6 +18,12 @@ export function AdminLoginPage() {
   if (status === 'loading') {
     return (
       <div className="admin-shell">
+        <Seo
+          title="Entrar | Brazvia"
+          description="Acesso restrito da Brazvia."
+          url={`${SITE_ORIGIN}/admin/login`}
+          robots="noindex, nofollow"
+        />
         <main className="container admin-main">
           <p>Validando sessão…</p>
         </main>
@@ -81,6 +89,12 @@ export function AdminLoginPage() {
 
   return (
     <div className="admin-shell">
+      <Seo
+        title="Entrar | Brazvia"
+        description="Acesso restrito da Brazvia."
+        url={`${SITE_ORIGIN}/admin/login`}
+        robots="noindex, nofollow"
+      />
       <main className="container admin-main">
         <section className="admin-form-page">
           <div className="admin-list-head">

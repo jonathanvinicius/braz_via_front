@@ -64,7 +64,7 @@ export function ImageCarousel({
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      <img src={slides[active]} alt={alt} loading="lazy" />
+      <img src={slides[active]} alt={slides.length > 1 ? `${alt}, foto ${active + 1}` : alt} loading="lazy" />
       {badge ? <span className="badge">{badge}</span> : null}
 
       {slides.length > 1 ? (

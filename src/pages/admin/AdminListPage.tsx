@@ -5,7 +5,7 @@ import { useProperties } from '../../context/PropertiesContext';
 import { formatPrice, type Property } from '../../data/properties';
 
 export function AdminListPage() {
-  const { properties, loading, error, deleteProperty, reorderProperties } =
+  const { properties, loading, error, deleteProperty, reorderProperties, publicSlug } =
     useProperties();
   const [items, setItems] = useState<Property[]>(properties);
   const [draggingId, setDraggingId] = useState<string | null>(null);
@@ -169,7 +169,7 @@ export function AdminListPage() {
                 </td>
                 <td>
                   <div className="admin-row-actions">
-                    <Link to={`/imovel/${property.slug}`} target="_blank">
+                    <Link to={`/imovel/${publicSlug(property)}`} target="_blank">
                       Ver
                     </Link>
                     <Link to={`/admin/editar/${property.id}`}>Editar</Link>

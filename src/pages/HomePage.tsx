@@ -1,13 +1,17 @@
-import { useMemo, useState } from 'react';
+import { useLayoutEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { Hero } from '../components/Hero';
+import { Seo } from '../components/Seo';
 import { RegionStrip } from '../components/RegionStrip';
 import { FiltersPanel, type Filters } from '../components/FiltersPanel';
 import { PropertyGrid } from '../components/PropertyGrid';
 import { CtaBanner } from '../components/CtaBanner';
 import { Footer } from '../components/Footer';
 import { useProperties } from '../context/PropertiesContext';
-import type { RegionId } from '../data/properties';
+import { regions, type RegionId } from '../data/properties';
+import { listingDescription, listingHeading, listingTitle } from '../lib/pageMeta';
+import { absoluteAssetUrl, SITE_ORIGIN } from '../lib/site';
 
 const initialFilters: Filters = {
   query: '',
@@ -19,10 +23,35 @@ const initialFilters: Filters = {
 };
 
 export function HomePage() {
+  const { hash } = useLocation();
   const { properties } = useProperties();
   const [region, setRegion] = useState<RegionId>('todas');
   const [filters, setFilters] = useState<Filters>(initialFilters);
   const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const cityLabel =
+    region === 'todas'
+      ? null
+      : (regions.find((item) => item.id === region)?.label ?? null);
+  const heading = listingHeading(filters.type, cityLabel);
+
+  useLayoutEffect(() => {
+    const sectionId = decodeURIComponent(hash.replace(/^#/, ''));
+    if (!sectionId) return;
+
+    const scrollToSection = () => {
+      const section = document.getElementById(sectionId);
+      if (!section) return false;
+      section.scrollIntoView({ block: 'start', inline: 'nearest' });
+      return true;
+    };
+
+    scrollToSection();
+    const frame = window.requestAnimationFrame(() => {
+      scrollToSection();
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [hash]);
 
   const filtered = useMemo(() => {
     return properties.filter((property) => {
@@ -53,8 +82,14 @@ export function HomePage() {
 
   return (
     <div className="app-shell">
+      <Seo
+        title={listingTitle(filters.type, cityLabel)}
+        description={listingDescription(filters.type, cityLabel)}
+        url={`${SITE_ORIGIN}/`}
+        image={absoluteAssetUrl('/logo-brazvia.png')}
+      />
       <Header onOpenFilters={() => setFiltersOpen(true)} />
-      <Hero />
+      <Hero heading={heading} />
       <RegionStrip active={region} onChange={setRegion} />
 
       <section className="listings" id="imoveis">

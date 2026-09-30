@@ -1,11 +1,19 @@
 import { Link, NavLink, Outlet } from 'react-router-dom';
+import { Seo } from '../../components/Seo';
 import { useAuth } from '../../context/AuthContext';
+import { SITE_ORIGIN } from '../../lib/site';
 
 export function AdminLayout() {
   const { logout } = useAuth();
 
   return (
     <div className="admin-shell">
+      <Seo
+        title="Administração | Brazvia"
+        description="Área restrita de gestão de anúncios da Brazvia."
+        url={`${SITE_ORIGIN}/admin`}
+        robots="noindex, nofollow"
+      />
       <header className="admin-topbar">
         <div className="container admin-topbar-inner">
           <Link to="/admin" className="admin-brand">

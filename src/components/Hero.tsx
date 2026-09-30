@@ -1,4 +1,8 @@
-export function Hero() {
+type HeroProps = {
+  heading: string;
+};
+
+export function Hero({ heading }: HeroProps) {
   return (
     <section className="hero" id="topo">
       <div className="hero-media" aria-hidden="true">
@@ -16,7 +20,7 @@ export function Hero() {
           className="hero-logo"
         />
         <p className="hero-tagline">Mais que imóveis, novos caminhos</p>
-        <h1>Encontre o imóvel certo na região certa.</h1>
+        <h1>{heading}</h1>
         <p className="hero-lead">
           Plataforma de vendas por região — Anápolis, Goiânia, Brasília e
           interior goiano — com curadoria BRAZVIA.

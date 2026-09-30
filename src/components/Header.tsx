@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { getBrokerWhatsAppLink, openWhatsApp } from '../data/properties';
 
 type HeaderProps = {
@@ -10,19 +11,19 @@ export function Header({ onOpenFilters }: HeaderProps) {
   return (
     <header className="site-header">
       <div className="container header-inner">
-        <a href="#topo" className="brand">
+        <Link to="/#topo" className="brand">
           <img src="/logo-mark.png" alt="" className="brand-mark" />
           <span className="brand-text">
             <strong>BRAZVIA</strong>
             <small>Negócios Imobiliários</small>
           </span>
-        </a>
+        </Link>
 
         <nav className="header-nav" aria-label="Principal">
-          <a href="#imoveis">Imóveis</a>
-          <a href="#regioes">Regiões</a>
-          <a href="#anunciar">Anunciar</a>
-          <a href="#contato">Contato</a>
+          <Link to="/#imoveis">Imóveis</Link>
+          <Link to="/#regioes">Regiões</Link>
+          <Link to="/#anunciar">Anunciar</Link>
+          <Link to="/#contato">Contato</Link>
         </nav>
 
         <div className="header-actions">

@@ -275,11 +275,12 @@ export function getBrokerWhatsAppLink(
   return `https://api.whatsapp.com/send?phone=${WHATSAPP_PHONE}&text=${encodeURIComponent(message)}`;
 }
 
-export function getWhatsAppLink(property: Property) {
+export function getWhatsAppLink(property: Property, pageUrl?: string) {
   const message =
     property.whatsappMessage ??
     `Olá! Tenho interesse no imóvel ${property.title} (${property.neighborhood}).`;
-  return getBrokerWhatsAppLink(message);
+  const text = pageUrl ? `${message}\n${pageUrl}` : message;
+  return getBrokerWhatsAppLink(text);
 }
 
 export function openWhatsApp(message?: string) {

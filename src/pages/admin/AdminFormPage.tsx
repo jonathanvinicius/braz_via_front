@@ -65,7 +65,7 @@ function toForm(property?: Property): PropertyInput {
 export function AdminFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getById, createProperty, updateProperty, loading } = useProperties();
+  const { getById, createProperty, updateProperty, loading, publicSlug } = useProperties();
   const existing = id ? getById(id) : undefined;
   const [form, setForm] = useState<PropertyInput>(() => toForm(existing));
   const [tagsText, setTagsText] = useState(
@@ -578,7 +578,7 @@ export function AdminFormPage() {
           {existing ? (
             <Link
               className="btn-outline dark"
-              to={`/imovel/${existing.slug}`}
+              to={`/imovel/${publicSlug(existing)}`}
               target="_blank"
             >
               Ver no site
